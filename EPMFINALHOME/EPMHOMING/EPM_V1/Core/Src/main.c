@@ -58,6 +58,7 @@ int tf;
  int ii=0;
  int ab;
  volatile uint32_t pCount=0;
+ int track;
 struct Distance
 {
 	float A;
@@ -952,24 +953,25 @@ void StartDefaultTask(void *argument)
 				lm++;
 					mCount=GETVALUE(&motor);
 					//lCount=0;
-					pCount=0;
+				//	pCount=0;
 				// wait for command from pc
-					osThreadFlagsWait(0x01, osFlagsWaitAny, osWaitForever);
-					CDC_Transmit_HS((uint8_t *)Return_Buf[1],9);
+				//	osThreadFlagsWait(0x01, osFlagsWaitAny, osWaitForever);
+					//CDC_Transmit_HS((uint8_t *)Return_Buf[1],9);
 					cCount=Dist.A;
 				// Stop to&fro motion
-					HAL_TIM_Base_Stop_IT(&htim1);
-					tb6600_Stop_tim(&motor);
-					tb6600_Disable(&motor);
+//					HAL_TIM_Base_Stop_IT(&htim1);
+//					tb6600_Stop_tim(&motor);
+//					tb6600_Disable(&motor);
 					//Home();
 				// Change Page
 				//Temp_Set=30;
-					Start_Process=0;
-					Dist.A=0;
-					inc1=0;
-					mCount=0;
-				//	lCount=0;
-					pCount=0;
+//				
+//					Start_Process=0;
+//					Dist.A=0;
+//					inc1=0;
+//					mCount=0;
+//				//	lCount=0;
+//					pCount=0;
 
 					
 			//}
@@ -1009,33 +1011,54 @@ void StartDefaultTask(void *argument)
 						{
 							case 0:
 								// Actuate forward
-								tb6600_Enable(&motor);
-								tb6600_ChangeDirection(&motor,CCW);//default cw change to ccw
-								tb6600_Movemm_tim(&motor,15);//default is 10
-								//tb6600_ChangeSpeed(&motor, mSpeed);//changed here
-							  //tb6600_calculate_motor_parm(&motor, mSpeed, Mm);
-							  //UpdateStepperSpeed(mSpeed,Mm);
-								HAL_GPIO_WritePin(GPIOG,GPIO_PIN_13,0);
-								HAL_GPIO_WritePin(GPIOE,GPIO_PIN_5,0);
-								HAL_TIM_Base_Start_IT(&htim1);
-								mCount=GETVALUE(&motor);
+//								tb6600_Enable(&motor);
+//								tb6600_ChangeDirection(&motor,CCW);//default cw change to ccw
+//								tb6600_Movemm_tim(&motor,50);//default is 10
+//								tb6600_ChangeSpeed(&motor, mSpeed);//changed here
+//							  //tb6600_calculate_motor_parm(&motor, mSpeed, Mm);
+//							  //UpdateStepperSpeed(mSpeed,Mm);
+//								HAL_GPIO_WritePin(GPIOG,GPIO_PIN_13,0);
+//								HAL_GPIO_WritePin(GPIOE,GPIO_PIN_5,0);
+//								HAL_TIM_Base_Start_IT(&htim1);
+//								mCount=GETVALUE(&motor);
+							
+							tb6600_Enable(&motor);
+							tb6600_ChangeDirection(&motor,CCW);//default cw change to ccw
+//changing the motor movement to based on distance and speed
+tb6600_Movemm_tim_1(&motor,50,50);// Speed = 50 mm/sec & distance = 50 mm
+HAL_GPIO_WritePin(GPIOG,GPIO_PIN_13,0);
+HAL_GPIO_WritePin(GPIOE,GPIO_PIN_5,0);
+HAL_TIM_Base_Start_IT(&htim1);
+mCount=GETVALUE(&motor);
+
 						
 
 								break;
 							case 1:
 								// Actuate Reverse
-								tb6600_Enable(&motor);
-								tb6600_ChangeDirection(&motor,CW);//deafult ccw change to cw
-								tb6600_Movemm_tim(&motor,15);
-								//tb6600_ChangeSpeed(&motor, mSpeed);
-							  //tb6600_calculate_motor_parm(&motor, mSpeed, Mm);
-							  //UpdateStepperSpeed(mSpeed);
-							  //tb6600_Disable(&motor);
-								HAL_GPIO_WritePin(GPIOG,GPIO_PIN_13,0);
-								HAL_GPIO_WritePin(GPIOE,GPIO_PIN_5,0);
-								HAL_TIM_Base_Start_IT(&htim1);
-								mCount=GETVALUE(&motor);
-							ab++;
+//								tb6600_Enable(&motor);
+//								tb6600_ChangeDirection(&motor,CW);//deafult ccw change to cw
+//								tb6600_Movemm_tim(&motor,50);
+//								tb6600_ChangeSpeed(&motor, mSpeed);
+//							  //tb6600_calculate_motor_parm(&motor, mSpeed, Mm);
+//							  //UpdateStepperSpeed(mSpeed);
+//							  //tb6600_Disable(&motor);
+//								HAL_GPIO_WritePin(GPIOG,GPIO_PIN_13,0);
+//								HAL_GPIO_WritePin(GPIOE,GPIO_PIN_5,0);
+//								HAL_TIM_Base_Start_IT(&htim1);
+//								mCount=GETVALUE(&motor);
+//							ab++;
+							
+							
+							tb6600_Enable(&motor);
+tb6600_ChangeDirection(&motor,CW);//deafult ccw change to cw
+// changing motor movement to be based on distance and speed
+tb6600_Movemm_tim_1(&motor,50,50);//Speed = 50 mm/sec & distance = 50 mm
+HAL_GPIO_WritePin(GPIOG,GPIO_PIN_13,0);
+HAL_GPIO_WritePin(GPIOE,GPIO_PIN_5,0);
+HAL_TIM_Base_Start_IT(&htim1);
+mCount=GETVALUE(&motor);
+ab++;
 								break;
 						}
 						break;
@@ -1134,6 +1157,13 @@ void StartReset(void *argument)
     if(Stop_Process == 1)
 		{
 			Home();
+			track++;
+			//Resetting process variables			
+			Start_Process=0;
+					Dist.A=0;
+					inc1=0;
+					mCount=0;
+					pCount=0;
 //			Reset_Timer (&htim1);
 //			HAL_TIM_Base_Stop_IT(&htim1);
 //			tb6600_Disable(&motor);
